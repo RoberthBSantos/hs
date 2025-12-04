@@ -4,7 +4,8 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { Room, Node, Wall, Opening } from '../models/Room';
 import { RoomViewer } from '../components/RoomViewer';
 import { Exporter } from '../services/Exporter';
-import * as FileSystem from 'expo-file-system';
+// Usamos a API legacy porque writeAsStringAsync da raiz foi descontinuado no SDK 54
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 
 type RootStackParamList = {
@@ -64,7 +65,9 @@ const ResultScreen = () => {
         }
 
         const fileUri = FileSystem.documentDirectory + filename;
-        await FileSystem.writeAsStringAsync(fileUri, content, { encoding: FileSystem.EncodingType.UTF8 });
+        // Em SDKs mais novos, o encoding padrão já é UTF-8, então não precisamos
+        // usar FileSystem.EncodingType (que pode ser undefined dependendo da versão).
+        await FileSystem.writeAsStringAsync(fileUri, content);
 
         if (await Sharing.isAvailableAsync()) {
             await Sharing.shareAsync(fileUri, { mimeType, dialogTitle: `Export ${filename}` });
